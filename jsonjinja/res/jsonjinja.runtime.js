@@ -3,15 +3,29 @@
   var _jsonjinja = global.jsonjinja;
   var templatetk = global.templatetk.noConflict();
 
-  var config = new templatetk.Config();
-  templatetk.defaultConfig = config;
-  config.getTemplate = function(name) {
+  templatetk.config.getTemplate = function(name) {
     return lib.getTemplate(name);
+  };
+
+  /* update the escape function to support wire object specified
+     HTML safety */
+  var escapeFunc = templatetk.rt.escape;
+  templatetk.rt.escape = function(value) {
+    var wod = lib.grabWireObjectDetails(value);
+    if (wod === 'html-safe')
+      return templatetk.rt.markSafe(value.value);
+    return escapeFunc(value);
   };
 
   var lib = global.jsonjinja = {
     _templateFactories : {},
     _templates : {},
+
+    grabWireObjectDetails : function(object) {
+      if (typeof object.__jsonjinja_wire__ !== 'undefined')
+        return object.__jsonjinja_wire__;
+      return null;
+    },
 
     getTemplate : function(name) {
       var tmpl = this._templates[name];
