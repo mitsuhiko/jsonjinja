@@ -1,0 +1,71 @@
+JSON Jinja Architecture and Design
+
+JSON Jinja is a template engine that is designed to operate on JSON data.
+It is sandboxed and compiles to Python bytecode and/or JavaScript code and
+is suitable for server and client side template evaluation.
+
+It's designed to be strict and implementable in many different languages.
+
+JSON Jinja is not a replacement for Jinja2.  Rather it is a Jinja2
+inspired template language for one very specific usecase: rendering
+templates from JSON data in a platform independent way.  For most
+situations you still want to use Jinja2 or any other templating
+language of choice.
+
+
+Differences to Jinja2
+---------------------
+
+-   No custom syntax delimiters.  No line statements or line comments.
+    No configurable endline behavior.
+
+-   It does not support operators for arbitrary expressions.  This was
+    decided because the semantics for how these operators work are so
+    fundamentally different between Python and JavaScript that it does
+    not make much sense to have them.
+
+    In theory one could adopt JavaScript like semantics for the basic
+    math operators and this is something that will be considered at a
+    later stage.
+
+-   No `set` statement.  The absence of the `set` statement makes
+    tracking of variables a lot easier because it's guaranteed that
+    each branch does not create variables that leak out of it.  This also
+    should make it a lot easier to deal with assignments in general.
+
+-   Imports must be toplevel.  The idea there is the same as for the
+    lack of `set` statement: it's easier to track.
+
+-   No tests.  Tests are really just filters and can be implemented
+    with filters if needed.
+
+-   No keyword arguments or vararg invocations of functions.  This
+    simplifies the generated JavaScript code a lot.
+
+-   Simplified semantics for extending, imports and includes.  They
+    all work exactly the same way in regards to scoping.
+
+-   No recursive for loops.
+
+-   Simplified macros.  They no longer accept keyword arguments or
+    any other kinds of variadic arguments.
+
+-   All objects passed to the template context must be JSON serializable
+    and idempotent after serialization/deserialization.  This also means
+    that dates must be passed to the context as strings or integers.
+
+    The idea there is that the data can be transmitted to the client
+    as JSON and it does not change behavior at all.
+
+-   No method invocation on builtin types like strings or integers
+    since these methods would change depending on the target
+    environment.  For this filters must be used.  However it is
+    possible to invoke methods on objects passed to the globals of
+    the execution environment.  This for instance can be used to
+    get hold of the current user etc.  These however have to be
+    carefully designed so that they work both on the server and the
+    client since the system will not account for that.
+
+-   Builtin with and autoescape statement that is always available.
+
+-   No interface for language extensions.
