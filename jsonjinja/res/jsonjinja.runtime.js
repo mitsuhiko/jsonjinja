@@ -17,6 +17,16 @@
     return escapeFunc(value);
   };
 
+  /* Finalize by default is a noop but we want to make sure that
+     if a HTML safe wire object is finalized we only print the
+     value. */
+  templatetk.rt.finalize = function(value) {
+    var wod = lib.grabWireObjectDetails(value);
+    if (wod === 'html-safe')
+      return value.value;
+    return value;
+  };
+
   var lib = global.jsonjinja = {
     _templateFactories : {},
     _templates : {},
