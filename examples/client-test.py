@@ -25,7 +25,7 @@ env = jsonjinja.Environment(loader=jsonjinja.DictLoader({
   <h1>Testing</h1>
   <ul>
   {% for item in seq %}
-    <li>{{ loop.index }} - {{ item }}
+    <li>{{ loop.index }} - {{ item }} [{{ loop.cycle("odd", "even") }}]
   {% endfor %}
   </ul>
 {% endblock %}
