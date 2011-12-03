@@ -16,11 +16,13 @@ env = jsonjinja.Environment(loader=jsonjinja.DictLoader({
     'layout.html': '''\
 <!doctype html>
 <title>{% block title %}{% endblock %}</title>
+<div class=body>
 {% block body %}{% endblock %}
+</div>
 ''',
     'test.html': '''\
 {% extends "layout.html" %}
-{% block title %}Index{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 {% block body %}
   <h1>Testing</h1>
   <ul>
@@ -34,6 +36,7 @@ env = jsonjinja.Environment(loader=jsonjinja.DictLoader({
 
 
 print '<!doctype html>'
+print '<script type=text/javascript src=jquery.js></script>'
 print '<script type=text/javascript>'
 for filename in runtime_js:
     with open(filename) as f:
@@ -41,5 +44,5 @@ for filename in runtime_js:
 print 'jsonjinja.addTemplates('
 env.compile_javascript_templates(stream=sys.stdout)
 print ');'
-print 'document.write(jsonjinja.getTemplate("test.html").render({seq: [1, 2, 3]}));'
+print 'document.write(jsonjinja.getTemplate("test.html").render({seq: [1, 2, 3], title: "Foo"}));'
 print '</script>'
