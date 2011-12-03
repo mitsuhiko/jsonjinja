@@ -10,26 +10,39 @@
   };
 
   var lib = global.jsonjinja = {
-    _templateCache : {},
+    _templateFactories : {},
     _templates : {},
 
     getTemplate : function(name) {
-      var tmpl = this._templateCache[name];
+      var tmpl = this._templates[name];
       if (tmpl == null) {
-        tmpl = this._templateCache[name] = this._templates[name](templatetk.rt);
-        tmpl.name = name;
+        var factory = this._templateFactories[name];
+        if (factory == null)
+          return null;
+        tmpl = this._registerTemplate(name, factory(templatetk.rt));
       }
       return tmpl;
     },
 
-    addTemplate : function(name, factory) {
-      this._templates[name] = factory;
-      this._templateCache[name] = null;
+    addTemplate : function(name, factoryOrTemplate) {
+      if (factoryOrTemplate instanceof templatetk.rt.Template) {
+        this._registerTemplate(name, factoryOrTemplate);
+      } else {
+        this._templates[name] = null;
+        this._templateFactories[name] = factoryOrTemplate;
+      }
+    },
+
+    _registerTemplate : function(name, template) {
+      delete this._templateFactories[name];
+      this._templates[name] = template;
+      template.name = name;
+      return template;
     },
 
     removeTemplate : function(name) {
       delete this._templates[name];
-      delete this._templateCache[name];
+      delete this._templateFactories[name];
     },
 
     listTemplates : function() {
