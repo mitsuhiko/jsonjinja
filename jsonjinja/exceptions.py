@@ -121,3 +121,7 @@ class FilterArgumentError(TemplateRuntimeError):
     """This error is raised if a filter was called with inappropriate
     arguments
     """
+
+
+class NotJSONCompatibleException(TemplateRuntimeError, AssertionError):
+    """Raised if a template context is not JSON compatible."""
