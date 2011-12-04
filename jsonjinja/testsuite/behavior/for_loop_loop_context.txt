@@ -1,3 +1,4 @@
 {% for item in seq %}
-{{ loop.index0 }}|{{ loop.index }}|{{ item }}
+{{ loop.index0 }}|{{ loop.index }}|{{ item }}|{{ loop.first }}|{{
+    loop.last }}|{{ loop.parent }}|{{ loop.cycle(0, 1) }}
 {% endfor %}

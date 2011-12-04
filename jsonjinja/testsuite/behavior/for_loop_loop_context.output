@@ -1,7 +1,7 @@
 
-0|1|a
+0|1|a|true|false|42|0
 
-1|2|b
+1|2|b|false|false|42|1
 
-2|3|c
+2|3|c|false|true|42|0
 
