@@ -24,7 +24,6 @@ from templatetk.utils import json
 template_path = os.path.join(os.path.dirname(__file__), 'behavior')
 template_exts = ('.html', '.txt')
 env = Environment(loader=FileSystemLoader([template_path]))
-_common_js = None
 
 
 class BaseTestCase(JSONJinjaTestCase):
