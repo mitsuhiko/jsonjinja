@@ -1,0 +1,5 @@
+Before
+{%- for a, (b, c) in seq %}
+{{ a }}|{{ b }}|{{ c }}
+{%- endfor %}
+After

@@ -154,7 +154,7 @@ class Parser(object):
         lineno = self.stream.expect('name:for').lineno
         target = self.parse_assign_target(extra_end_rules=('name:in',))
         self.stream.expect('name:in')
-        iter = self.parse_tuple(with_condexpr=False)
+        iter = self.parse_expression()
         body = self.parse_statements(('name:endfor', 'name:else'))
         if self.stream.next().value == 'endfor':
             else_ = []
@@ -166,7 +166,7 @@ class Parser(object):
         """Parse an if construct."""
         node = result = nodes.If(lineno=self.stream.expect('name:if').lineno)
         while 1:
-            node.test = self.parse_tuple(with_condexpr=False)
+            node.test = self.parse_expression()
             node.body = self.parse_statements(('name:elif', 'name:else',
                                                'name:endif'))
             token = self.stream.next()
@@ -302,23 +302,38 @@ class Parser(object):
 
     def parse_assign_target(self, with_tuple=True, name_only=False,
                             extra_end_rules=None):
-        """Parse an assignment target.  As Jinja2 allows assignments to
-        tuples, this function can parse all allowed assignment targets.  Per
-        default assignments to tuples are parsed, that can be disable however
-        by setting `with_tuple` to `False`.  If only assignments to names are
-        wanted `name_only` can be set to `True`.  The `extra_end_rules`
-        parameter is forwarded to the tuple parsing function.
-        """
-        if name_only:
+        def parse_name():
             token = self.stream.expect('name')
-            target = nodes.Name(token.value, 'store', lineno=token.lineno)
+            return nodes.Name(token.value, 'store', lineno=token.lineno)
+        def parse_tuple_expr():
+            lineno = self.stream.current.lineno
+            args = []
+            is_tuple = False
+            while 1:
+                if args:
+                    self.stream.expect('comma')
+                if self.is_tuple_end(extra_end_rules):
+                    break
+                if self.stream.skip_if('lparen'):
+                    args.append(parse_tuple_expr())
+                    self.stream.expect('rparen')
+                else:
+                    args.append(parse_name())
+                if self.stream.current.type == 'comma':
+                    is_tuple = True
+                else:
+                    break
+            if not is_tuple:
+                if args:
+                    return args[0]
+                self.fail('Expected an expression, got \'%s\'' %
+                          describe_token(self.stream.current))
+            return nodes.Tuple(args, 'store', lineno=lineno)
+
+        if name_only:
+            target = parse_name()
         else:
-            if with_tuple:
-                target = self.parse_tuple(simplified=True,
-                                          extra_end_rules=extra_end_rules)
-            else:
-                target = self.parse_primary()
-            target.set_ctx('store')
+            target = parse_tuple_expr()
         if not target.can_assign():
             self.fail('can\'t assign to %r' % target.__class__.
                       __name__.lower(), target.lineno)
@@ -442,7 +457,7 @@ class Parser(object):
         return node
 
     def parse_tuple(self, simplified=False, with_condexpr=True,
-                    extra_end_rules=None, explicit_parentheses=False):
+                    extra_end_rules=None):
         """Works like `parse_expression` but if multiple expressions are
         delimited by a comma a :class:`~jinja2.nodes.Tuple` node is created.
         This method could also return a regular expression instead of a tuple
@@ -456,10 +471,6 @@ class Parser(object):
         an extra hint is needed that marks the end of a tuple.  For example
         for loops support tuples between `for` and `in`.  In that case the
         `extra_end_rules` is set to ``['name:in']``.
-
-        `explicit_parentheses` is true if the parsing was triggered by an
-        expression in parentheses.  This is used to figure out if an empty
-        tuple is a valid expression or not.
         """
         lineno = self.stream.current.lineno
         if simplified:
@@ -490,9 +501,8 @@ class Parser(object):
             # not a valid expression.  This would mean nothing (literally
             # nothing) in the spot of an expression would be an empty
             # tuple.
-            if not explicit_parentheses:
-                self.fail('Expected an expression, got \'%s\'' %
-                          describe_token(self.stream.current))
+            self.fail('Expected an expression, got \'%s\'' %
+                      describe_token(self.stream.current))
 
         return nodes.Tuple(args, 'load', lineno=lineno)
 
@@ -647,7 +657,7 @@ class Parser(object):
                     self.stream.next()
                 elif token.type == 'variable_begin':
                     self.stream.next()
-                    add_data(self.parse_tuple(with_condexpr=True))
+                    add_data(self.parse_expression())
                     self.stream.expect('variable_end')
                 elif token.type == 'block_begin':
                     flush_data()
