@@ -1,0 +1,8 @@
+{%- for item in [] %}
+{%- else -%}
+ELSE
+{%- endfor %}
+{%- for item in [1] %}
+{%- else -%}
+ELSE
+{%- endfor %}
