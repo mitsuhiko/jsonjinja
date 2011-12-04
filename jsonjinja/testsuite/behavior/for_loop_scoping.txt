@@ -3,3 +3,6 @@
 {{ loop.index0 }}|{{ item }}
 {%- endfor %}
 {{ loop }}|{{ item }}
+{%- for item in [] %}
+{%- endfor %}
+{{ loop }}
