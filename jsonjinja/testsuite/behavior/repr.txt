@@ -1,0 +1,12 @@
+{{ 42 }}
+{{ 42.0 }}
+{{ 42.5 }}
+{{ "test" }}
+{{ true }}
+{{ false }}
+{{ True }}
+{{ False }}
+{{ None }}
+{{ none }}
+{{ missing_var }}
+{{ wire_htmlsafe }}

@@ -35,6 +35,8 @@ class BaseTestCase(JSONJinjaTestCase):
             context = json.load(f)
         with open(base_filename + '.output') as f:
             expected_output = f.read()
+            if expected_output[-1] == '\n':
+                expected_output = expected_output[:-1]
         output = self.evaluate_template(os.path.basename(template_filename),
                                         context)
         self.assert_equal(expected_output, output)

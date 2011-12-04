@@ -2,10 +2,27 @@
   var global = this;
   var _jsonjinja = global.jsonjinja;
   var templatetk = global.templatetk.noConflict();
+  var undefined = [][0];
 
   templatetk.config.getTemplate = function(name) {
     return lib.getTemplate(name);
   };
+
+  function simpleRepr(value) {
+    if (value instanceof templatetk.rt.Markup)
+      return value;
+    if (value === undefined)
+      return '';
+    if (value === null)
+      return 'none';
+    if (typeof value === 'boolean' ||
+        typeof value === 'number' ||
+        typeof value === 'string')
+      return '' + value;
+    lib.signalError('Cannot print complex objects, tried to print ' +
+      Object.prototype.toString.call(value) + ' (' + value + ')');
+    return '';
+  }
 
   /* update the escape function to support wire object specified
      HTML safety */
@@ -14,16 +31,16 @@
     var wod = lib.grabWireObjectDetails(value);
     if (wod === 'html-safe')
       return templatetk.rt.markSafe(value.value);
-    return escapeFunc(value);
+    return escapeFunc(simpleRepr(value));
   };
 
   /* Finalize by default just converts into a string.  We want to make sure
      that if a HTML safe wire object is finalized we only print the value. */
-  templatetk.rt.finalize = function(value) {
+  templatetk.rt.toUnicode = function(value) {
     var wod = lib.grabWireObjectDetails(value);
     if (wod === 'html-safe')
-      value = value.value;
-    return '' + value;
+      return value.value;
+    return simpleRepr(value);
   };
 
   var lib = global.jsonjinja = {
@@ -31,7 +48,7 @@
     _templates : {},
 
     grabWireObjectDetails : function(object) {
-      if (typeof object.__jsonjinja_wire__ !== 'undefined')
+      if (object && typeof object.__jsonjinja_wire__ !== 'undefined')
         return object.__jsonjinja_wire__;
       return null;
     },
@@ -82,6 +99,11 @@
     },
 
     templatetk : templatetk,
+
+    signalError : function(message) {
+      if (console && console.error)
+        console.error(message);
+    },
 
     noConflict : function() {
       global.jsonjinja = _jsonjinja;

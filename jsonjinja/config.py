@@ -2,6 +2,11 @@ from templatetk.config import Config as ConfigBase, Undefined
 from weakref import ref as weakref
 
 
+def grab_wire_object_details(obj):
+    if isinstance(obj, dict) and '__jsonjinja_wire__' in obj:
+        return obj['__jsonjinja_wire__']
+
+
 class Config(ConfigBase):
 
     def __init__(self, environment):
@@ -15,6 +20,25 @@ class Config(ConfigBase):
 
     def get_autoescape_default(self, name):
         return name.endswith(('.html', '.xml'))
+
+    def to_unicode(self, value):
+        if value is None:
+            return u'none'
+        if self.is_undefined(value):
+            return ''
+        if isinstance(value, bool):
+            return value and u'true' or u'false'
+        if isinstance(value, float):
+            if int(value) == value:
+                return unicode(int(value))
+            return unicode(value)
+        if isinstance(value, (int, long, basestring)):
+            return unicode(value)
+        wod = grab_wire_object_details(value)
+        if wod == 'html-safe':
+            return unicode(value['value'])
+        raise TypeError('Cannot print complex objects, tried to '
+                        'print %r' % value)
 
     def getattr(self, obj, attribute):
         try:
