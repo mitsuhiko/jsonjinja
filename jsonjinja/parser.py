@@ -255,8 +255,7 @@ class Parser(object):
         while self.stream.current.type != 'rparen':
             if args:
                 self.stream.expect('comma')
-            arg = self.parse_assign_target(name_only=True)
-            arg.set_ctx('param')
+            arg = self.parse_assign_target(name_only=True, ctx='param')
             if self.stream.skip_if('assign'):
                 defaults.append(self.parse_expression())
             args.append(arg)
@@ -301,10 +300,10 @@ class Parser(object):
         return node
 
     def parse_assign_target(self, with_tuple=True, name_only=False,
-                            extra_end_rules=None):
+                            extra_end_rules=None, ctx='store'):
         def parse_name():
             token = self.stream.expect('name')
-            return nodes.Name(token.value, 'store', lineno=token.lineno)
+            return nodes.Name(token.value, ctx, lineno=token.lineno)
         def parse_tuple_expr():
             lineno = self.stream.current.lineno
             args = []
@@ -328,7 +327,7 @@ class Parser(object):
                     return args[0]
                 self.fail('Expected an expression, got \'%s\'' %
                           describe_token(self.stream.current))
-            return nodes.Tuple(args, 'store', lineno=lineno)
+            return nodes.Tuple(args, ctx, lineno=lineno)
 
         if name_only:
             target = parse_name()
