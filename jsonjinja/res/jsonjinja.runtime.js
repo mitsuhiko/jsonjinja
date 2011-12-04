@@ -16,9 +16,11 @@
         typeof value === 'number' ||
         typeof value === 'string')
       return '' + value;
-    lib.signalError('Cannot print complex objects, tried to print ' +
-      Object.prototype.toString.call(value) + ' (' + value + ')');
-    return '';
+    if (value instanceof Array ||
+        (value.prototype && value.prototype.toString === Object.prototype.toString))
+      lib.signalError('Cannot print complex objects, tried to print ' +
+        Object.prototype.toString.call(value) + ' (' + value + ')');
+    return '' + value;
   }
 
   /* update the escape function to support wire object specified

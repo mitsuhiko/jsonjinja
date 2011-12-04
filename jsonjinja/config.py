@@ -21,9 +21,12 @@ class Config(ConfigBase):
     def get_autoescape_default(self, name):
         return name.endswith(('.html', '.xml'))
 
+    def mark_safe(self, value):
+        return self.markup_type(self.to_unicode(value))
+
     def to_unicode(self, value):
         if value is None or self.is_undefined(value):
-            return ''
+            return u''
         if isinstance(value, bool):
             return value and u'true' or u'false'
         if isinstance(value, float):
@@ -35,8 +38,10 @@ class Config(ConfigBase):
         wod = grab_wire_object_details(value)
         if wod == 'html-safe':
             return unicode(value['value'])
-        raise TypeError('Cannot print complex objects, tried to '
-                        'print %r' % value)
+        if isinstance(value, (list, dict)):
+            raise TypeError('Cannot print objects, tried to '
+                            'print %r' % value)
+        return unicode(value)
 
     def getattr(self, obj, attribute):
         try:
