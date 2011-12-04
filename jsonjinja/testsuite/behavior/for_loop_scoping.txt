@@ -1,0 +1,5 @@
+{{ loop }}|{{ item }}
+{%- for item in seq %}
+{{ loop.index0 }}|{{ item }}
+{%- endfor %}
+{{ loop }}|{{ item }}
