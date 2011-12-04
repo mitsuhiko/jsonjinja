@@ -456,56 +456,6 @@ class Parser(object):
             self.fail("unexpected '%s'" % describe_token(token), token.lineno)
         return node
 
-    def parse_tuple(self, simplified=False, with_condexpr=True,
-                    extra_end_rules=None):
-        """Works like `parse_expression` but if multiple expressions are
-        delimited by a comma a :class:`~jinja2.nodes.Tuple` node is created.
-        This method could also return a regular expression instead of a tuple
-        if no commas where found.
-
-        The default parsing mode is a full tuple.  If `simplified` is `True`
-        only names and literals are parsed.  The `no_condexpr` parameter is
-        forwarded to :meth:`parse_expression`.
-
-        Because tuples do not require delimiters and may end in a bogus comma
-        an extra hint is needed that marks the end of a tuple.  For example
-        for loops support tuples between `for` and `in`.  In that case the
-        `extra_end_rules` is set to ``['name:in']``.
-        """
-        lineno = self.stream.current.lineno
-        if simplified:
-            parse = self.parse_primary
-        elif with_condexpr:
-            parse = self.parse_expression
-        else:
-            parse = lambda: self.parse_expression(with_condexpr=False)
-        args = []
-        is_tuple = False
-        while 1:
-            if args:
-                self.stream.expect('comma')
-            if self.is_tuple_end(extra_end_rules):
-                break
-            args.append(parse())
-            if self.stream.current.type == 'comma':
-                is_tuple = True
-            else:
-                break
-            lineno = self.stream.current.lineno
-
-        if not is_tuple:
-            if args:
-                return args[0]
-
-            # if we don't have explicit parentheses, an empty tuple is
-            # not a valid expression.  This would mean nothing (literally
-            # nothing) in the spot of an expression would be an empty
-            # tuple.
-            self.fail('Expected an expression, got \'%s\'' %
-                      describe_token(self.stream.current))
-
-        return nodes.Tuple(args, 'load', lineno=lineno)
-
     def parse_list(self):
         token = self.stream.expect('lbracket')
         items = []
