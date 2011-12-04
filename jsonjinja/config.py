@@ -13,6 +13,9 @@ class Config(ConfigBase):
     def environment(self):
         return self._environment()
 
+    def get_autoescape_default(self, name):
+        return name.endswith(('.html', '.xml'))
+
     def getattr(self, obj, attribute):
         try:
             return obj[attribute]

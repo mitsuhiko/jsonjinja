@@ -1,5 +1,23 @@
+import os
 import errno
 from jsonjinja.exceptions import NotJSONCompatibleException
+
+
+def get_runtime_javascript():
+    import templatetk
+    import jsonjinja
+    runtime_js = [
+        os.path.join(os.path.dirname(templatetk.__file__),
+                     'res', 'templatetk.runtime.js'),
+        os.path.join(os.path.dirname(jsonjinja.__file__),
+                     'res', 'jsonjinja.runtime.js')
+    ]
+
+    rv = []
+    for filename in runtime_js:
+        with open(filename) as f:
+            rv.append(f.read())
+    return ''.join(rv)
 
 
 def ensure_json_compatible(obj):

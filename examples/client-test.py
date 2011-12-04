@@ -1,15 +1,6 @@
-import os
 import sys
-import templatetk
 import jsonjinja
-
-
-runtime_js = [
-    os.path.join(os.path.dirname(templatetk.__file__),
-                 'res', 'templatetk.runtime.js'),
-    os.path.join(os.path.dirname(jsonjinja.__file__),
-                 'res', 'jsonjinja.runtime.js')
-]
+from jsonjinja.utils import get_runtime_javascript
 
 
 env = jsonjinja.Environment(loader=jsonjinja.DictLoader({
@@ -38,9 +29,7 @@ env = jsonjinja.Environment(loader=jsonjinja.DictLoader({
 print '<!doctype html>'
 print '<script type=text/javascript src=jquery.js></script>'
 print '<script type=text/javascript>'
-for filename in runtime_js:
-    with open(filename) as f:
-        print f.read()
+print get_runtime_javascript()
 print 'jsonjinja.addTemplates('
 env.compile_javascript_templates(stream=sys.stdout)
 print ');'
