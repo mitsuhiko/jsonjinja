@@ -1,0 +1,40 @@
+
+  // JSON Jinja //
+     a server/client templating system
+
+  -- What is it?
+
+     JSON Jinja is a templating language inspired by Jinja2 with the
+     idea that a template should be able to operate on the same JSON
+     data on the server and on the client with the same semantics.
+
+     It follows largely the Jinja2 feature set but restricts and
+     changes semantics to be better compilable to JavaScript and to
+     better work on different execution environments.
+
+     The end goal is to define the language so that it can be
+     implemented in different languages without having to implement
+     a whole virtual machine or something similar.
+
+     This implementation however is written in Python based on my
+     templatetk library and will generate JavaScript code for the
+     client that can be run with a minimal runtime library.
+
+  -- Why?
+
+     To be able to use the same JSON data to render a template both
+     on the server and the client.  The idea is that you render
+     the template on the server the first time the page is loaded
+     and from that point onwards you only transmit JSON to the client
+     and render on the clientside.
+
+     If a browser does not have a proper history API or JavaScript
+     one can continue to request new pages from the server and
+     render them there.
+
+  -- Requirements?
+
+     Currently Python 2.6 and templatetk from my github repo.
+     templatetk and this library are both evolving at the moment.
+
+
