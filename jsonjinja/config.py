@@ -22,9 +22,7 @@ class Config(ConfigBase):
         return name.endswith(('.html', '.xml'))
 
     def to_unicode(self, value):
-        if value is None:
-            return u'none'
-        if self.is_undefined(value):
+        if value is None or self.is_undefined(value):
             return ''
         if isinstance(value, bool):
             return value and u'true' or u'false'

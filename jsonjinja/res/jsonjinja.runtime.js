@@ -2,7 +2,6 @@
   var global = this;
   var _jsonjinja = global.jsonjinja;
   var templatetk = global.templatetk.noConflict();
-  var undefined = [][0];
 
   templatetk.config.getTemplate = function(name) {
     return lib.getTemplate(name);
@@ -11,10 +10,8 @@
   function simpleRepr(value) {
     if (value instanceof templatetk.rt.Markup)
       return value;
-    if (value === undefined)
+    if (value == null)
       return '';
-    if (value === null)
-      return 'none';
     if (typeof value === 'boolean' ||
         typeof value === 'number' ||
         typeof value === 'string')
