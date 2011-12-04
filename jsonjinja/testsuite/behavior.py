@@ -53,7 +53,8 @@ def make_behavior_testcase():
         setattr(BehaviorTestCase, method, test_method)
 
     for filename in os.listdir(template_path):
-        if filename.endswith(template_exts):
+        if filename.endswith(template_exts) and \
+           not filename.startswith('_'):
             add_test(os.path.join(template_path, filename))
 
     return BehaviorTestCase

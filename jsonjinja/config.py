@@ -24,6 +24,12 @@ class Config(ConfigBase):
     def mark_safe(self, value):
         return self.markup_type(self.to_unicode(value))
 
+    def get_template(self, name):
+        return self.environment.get_template(name)
+
+    def yield_from_template(self, template, info, vars=None):
+        return template.execute(vars or {}, info)
+
     def to_unicode(self, value):
         if value is None or self.is_undefined(value):
             return u''
