@@ -12,6 +12,7 @@ import os
 import unittest
 import subprocess
 import tempfile
+from cStringIO import StringIO
 
 from jsonjinja.testsuite import JSONJinjaTestCase
 from jsonjinja.environment import Environment
@@ -23,6 +24,7 @@ from templatetk.utils import json
 template_path = os.path.join(os.path.dirname(__file__), 'behavior')
 template_exts = ('.html', '.txt')
 env = Environment(loader=FileSystemLoader([template_path]))
+_common_js = None
 
 
 class BaseTestCase(JSONJinjaTestCase):
@@ -64,25 +66,34 @@ class PythonTestCase(BehaviorTestCase):
 
 
 class JavaScriptTestCase(BehaviorTestCase):
+    _common_js = None
 
-    def dump_all_javascript(self, f):
+    @classmethod
+    def get_common_javascript(cls):
+        if cls._common_js is not None:
+            return cls._common_js
         def filter_func(filename):
             return filename.endswith(template_exts)
+
+        f = StringIO()
         f.write(get_runtime_javascript())
         f.write('jsonjinja.addTemplates(')
         env.compile_javascript_templates(filter_func=filter_func,
                                          stream=f)
         f.write(');\n')
 
+        rv = cls._common_js = f.getvalue()
+        return rv
+
     def evaluate_template(self, load_name, context):
         fd, filename = tempfile.mkstemp(text=True)
         f = os.fdopen(fd, 'w')
         try:
-            self.dump_all_javascript(f)
-            f.write('var tmpl = jsonjinja.getTemplate(%s);\n' %
-                    json.dumps(load_name))
-            f.write('process.stdout.write(tmpl.render(%s));\n' %
-                    (json.dumps(context)))
+            f.write(self.get_common_javascript())
+            f.write('''
+                var tmpl = jsonjinja.getTemplate(%s);
+                process.stdout.write(tmpl.render(%s));
+            ''' % (json.dumps(load_name), json.dumps(context)))
             f.close()
             c = subprocess.Popen(['node', filename], stdout=subprocess.PIPE)
             stdout, stderr = c.communicate()
