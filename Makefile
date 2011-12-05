@@ -1,2 +1,2 @@
 test:
-	python run-tests.py --verbose
+	python run-tests.py
