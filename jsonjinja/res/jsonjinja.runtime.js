@@ -21,8 +21,10 @@
     return rv;
   };
 
-  /* update the escape function to support wire object specified
-     HTML safety */
+  templatetk.rt.markSafe = function(value) {
+    return {__jsonjinja_wire__: 'html-safe', value: value};
+  };
+
   templatetk.rt.finalize = function(value, autoescape) {
     if (value == null)
       return '';
