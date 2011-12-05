@@ -1,5 +1,6 @@
-from templatetk.config import Config as ConfigBase, Undefined
+from itertools import imap
 from weakref import ref as weakref
+from templatetk.config import Config as ConfigBase, Undefined
 
 
 def grab_wire_object_details(obj):
@@ -22,7 +23,7 @@ class Config(ConfigBase):
         return name.endswith(('.html', '.xml'))
 
     def mark_safe(self, value):
-        return self.markup_type(self.to_unicode(value))
+        return {'__jsonjinja_wire__': 'html-safe', 'value': value}
 
     def get_template(self, name):
         return self.environment.get_template(name)
@@ -54,6 +55,12 @@ class Config(ConfigBase):
             iterator = iterator.items()
             iterator.sort()
         return ConfigBase.wrap_loop(self, iterator, parent)
+
+    def concat(self, info, iterable):
+        rv = u''.join(imap(info.finalize, iterable))
+        if info.autoescape:
+            rv = self.mark_safe(rv)
+        return rv
 
     def getattr(self, obj, attribute):
         try:

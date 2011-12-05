@@ -25,6 +25,14 @@
     return {__jsonjinja_wire__: 'html-safe', value: value};
   };
 
+  templatetk.rt.concat = function(info, pieces) {
+    var rv = [];
+    for (var i = 0, n = pieces.length; i != n; i++)
+      rv.push(info.finalize(pieces[i]));
+    rv = rv.join('');
+    return info.autoescape ? this.markSafe(rv) : rv;
+  };
+
   templatetk.rt.finalize = function(value, autoescape) {
     if (value == null)
       return '';

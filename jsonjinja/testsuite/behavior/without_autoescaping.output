@@ -1,2 +1,3 @@
 <b>safe</b>
 <script>unsafe</script>
+42<b>safe</b><script>unsafe</script>

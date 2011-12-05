@@ -18,7 +18,7 @@ newline_re = re.compile(r'(\r\n|\r|\n)')
 
 
 operators = {
-    '~':            'concat',
+    '~':            'tilde',
     '==':           'eq',
     '!=':           'ne',
     '>':            'gt',
