@@ -272,12 +272,15 @@ class Parser(object):
         return node
 
     def parse_macro(self):
-        node = nodes.Macro(lineno=next(self.stream).lineno)
-        node.name = self.parse_assign_target(name_only=True).name
+        lineno = self.stream.next().lineno
+        node = nodes.Function()
+        macro_name = self.parse_assign_target(name_only=True).name
+        node.name = nodes.Const(macro_name)
         self.parse_signature(node)
         node.body = self.parse_statements(('name:endmacro',),
                                           drop_needle=True)
-        return node
+        return nodes.Assign(nodes.Name(macro_name, 'store'), node,
+                            lineno=lineno)
 
     def parse_print(self):
         node = nodes.Output(lineno=next(self.stream).lineno)
