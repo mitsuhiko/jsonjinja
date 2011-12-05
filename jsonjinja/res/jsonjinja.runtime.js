@@ -7,39 +7,28 @@
     return lib.getTemplate(name);
   };
 
-  function simpleRepr(value) {
-    if (value instanceof templatetk.rt.Markup)
-      return value;
+  templatetk.config.getAutoEscapeDefault = function(name) {
+    return !!name.match(/\.(html|xml)$/);
+  };
+
+  /* update the escape function to support wire object specified
+     HTML safety */
+  templatetk.rt.finalize = function(value, autoescape) {
     if (value == null)
       return '';
     if (typeof value === 'boolean' ||
-        typeof value === 'number' ||
-        typeof value === 'string')
+        typeof value === 'number')
       return '' + value;
+    var wod = lib.grabWireObjectDetails(value);
+    if (wod === 'html-safe')
+      return value.value;
     if (value instanceof Array ||
         (value.prototype && value.prototype.toString === Object.prototype.toString))
       lib.signalError('Cannot print complex objects, tried to print ' +
         Object.prototype.toString.call(value) + ' (' + value + ')');
+    if (autoescape)
+      return templatetk.utils.escape(value);
     return '' + value;
-  }
-
-  /* update the escape function to support wire object specified
-     HTML safety */
-  var escapeFunc = templatetk.rt.escape;
-  templatetk.rt.escape = function(value) {
-    var wod = lib.grabWireObjectDetails(value);
-    if (wod === 'html-safe')
-      return templatetk.rt.markSafe(value.value);
-    return escapeFunc(simpleRepr(value));
-  };
-
-  /* Finalize by default just converts into a string.  We want to make sure
-     that if a HTML safe wire object is finalized we only print the value. */
-  templatetk.rt.toUnicode = function(value) {
-    var wod = lib.grabWireObjectDetails(value);
-    if (wod === 'html-safe')
-      return value.value;
-    return simpleRepr(value);
   };
 
   var lib = global.jsonjinja = {

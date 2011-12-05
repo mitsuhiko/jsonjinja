@@ -30,24 +30,30 @@ class Config(ConfigBase):
     def yield_from_template(self, template, info, vars=None):
         return template.execute(vars or {}, info)
 
-    def to_unicode(self, value):
+    def finalize(self, value, autoescape):
         if value is None or self.is_undefined(value):
             return u''
-        if isinstance(value, bool):
+        elif isinstance(value, bool):
             return value and u'true' or u'false'
-        if isinstance(value, float):
+        elif isinstance(value, float):
             if int(value) == value:
                 return unicode(int(value))
             return unicode(value)
-        if isinstance(value, (int, long, basestring)):
-            return unicode(value)
         wod = grab_wire_object_details(value)
         if wod == 'html-safe':
-            return unicode(value['value'])
+            return value['value']
         if isinstance(value, (list, dict)):
             raise TypeError('Cannot print objects, tried to '
                             'print %r' % value)
+        if autoescape:
+            value = self.markup_type.escape(unicode(value))
         return unicode(value)
+
+    def escape(self, value):
+        wod = grab_wire_object_details(value)
+        if wod == 'html-safe':
+            return self.markup_type(value['value'])
+        return self.markup_type.escape(self.to_unicode(value))
 
     def getattr(self, obj, attribute):
         try:
