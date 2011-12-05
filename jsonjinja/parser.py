@@ -4,7 +4,7 @@ from jsonjinja.lexer import describe_token, describe_token_expr
 
 
 _statement_keywords = frozenset(['for', 'if', 'block', 'extends', 'print',
-                                 'macro', 'include', 'from', 'import'])
+                                 'macro', 'from', 'import'])
 _compare_operators = frozenset(['eq', 'ne', 'lt', 'lteq', 'gt', 'gteq'])
 
 
@@ -202,17 +202,6 @@ class Parser(object):
     def parse_extends(self):
         node = nodes.Extends(lineno=self.stream.next().lineno)
         node.template = self.parse_expression()
-        return node
-
-    def parse_include(self):
-        node = nodes.Include(lineno=self.stream.next().lineno)
-        node.template = self.parse_expression()
-        if self.stream.current.test('name:ignore') and \
-           self.stream.look().test('name:missing'):
-            node.ignore_missing = True
-            self.stream.skip(2)
-        else:
-            node.ignore_missing = False
         return node
 
     def parse_import(self):
