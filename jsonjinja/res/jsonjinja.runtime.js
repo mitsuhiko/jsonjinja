@@ -2,6 +2,7 @@
   var global = this;
   var _jsonjinja = global.jsonjinja;
   var templatetk = global.templatetk.noConflict();
+  var hasOwnProperty = Object.prototype.hasOwnProperty;
 
   templatetk.config.getTemplate = function(name) {
     return lib.getTemplate(name);
@@ -9,6 +10,15 @@
 
   templatetk.config.getAutoEscapeDefault = function(name) {
     return !!name.match(/\.(html|xml)$/);
+  };
+
+  templatetk.rt.sequenceFromObject = function(obj) {
+    var rv = [];
+    for (var key in obj)
+      if (hasOwnProperty.call(obj, key))
+        rv.push([key, obj[key]]);
+    rv.sort();
+    return rv;
   };
 
   /* update the escape function to support wire object specified

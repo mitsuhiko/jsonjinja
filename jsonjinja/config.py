@@ -49,11 +49,11 @@ class Config(ConfigBase):
             value = self.markup_type.escape(unicode(value))
         return unicode(value)
 
-    def escape(self, value):
-        wod = grab_wire_object_details(value)
-        if wod == 'html-safe':
-            return self.markup_type(value['value'])
-        return self.markup_type.escape(self.to_unicode(value))
+    def wrap_loop(self, iterator, parent=None):
+        if isinstance(iterator, dict):
+            iterator = iterator.items()
+            iterator.sort()
+        return ConfigBase.wrap_loop(self, iterator, parent)
 
     def getattr(self, obj, attribute):
         try:
