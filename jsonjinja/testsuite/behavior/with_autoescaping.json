@@ -1,0 +1,2 @@
+{"safe": {"__jsonjinja_wire__": "html-safe", "value": "<b>safe</b>"},
+ "unsafe": "<script>unsafe</script>"}
